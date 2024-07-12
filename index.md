@@ -156,30 +156,4 @@ CREATE TABLE feed (
 
 ```./yourscript```
 
-## Create the database and the tables
-
-## Connect to The DB
-
-I'm not sure where I will deploy this code... I'm thinking that I will deploy on a virtual machine... or possibly cloud run as a web app. A web app makes sense so I can manage it from a distance.  So run it as a flask app.. Call run. Then scan
-
-Or I just drop it as a cloud run job that deploys every hour..
-
-Or i leave it up as a web app that can be called to update the db. Yeah i like this best..
-
-### Flask App
-
-Flask app that takes very few args
-
-1. Post endpoint to pull the relvent post information
-2. Normalize endpoint that calls  a workflow to normalize the entire db.  
-
-## The workflow
-
-### The scraper
-
-The rss scraper pulls the meta information and then forwards it to the post endpoint
-
-### The post endpoint
-
-The post endpoint just adds a row to the posts table. 
-
+The script should work and create your basic files.. I have some more work to do to create an api to update the tables.  
