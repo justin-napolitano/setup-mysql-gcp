@@ -34,6 +34,9 @@ set -o allexport
 PROJECT_ID="smart-axis-421517"
 INSTANCE_NAME="jnapolitano-db"
 REGION="us-west2" # e.g., us-central1
+DATABASE_NAME="jnapolitano"
+BUILDS_SQL_FILE="builds.sql" # Name of your builds SQL file
+FEED_SQL_FILE="feed.sql"   # Name of your feeds SQL file
 
 # Authenticate with GCP (make sure you have gcloud SDK installed and authenticated)
 gcloud auth login
@@ -41,8 +44,10 @@ gcloud auth login
 # Set the project
 gcloud config set project $PROJECT_ID
 
+
 # Enable the Cloud SQL Admin API
 gcloud services enable sqladmin.googleapis.com
+
 
 # Create a Cloud SQL instance
 gcloud sql instances create $INSTANCE_NAME \
@@ -74,7 +79,16 @@ EOF
 # DATABASE_NAME="your-database-name"
 # gcloud sql databases create $DATABASE_NAME --instance=$INSTANCE_NAME
 
-echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra'."
+# Create a database
+gcloud sql databases create $DATABASE_NAME --instance=$INSTANCE_NAME
+
+# Execute the SQL files to create the 'builds' and 'feeds' tables
+gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $BUILDS_SQL_FILE
+gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $FEED_SQL_FILE
+
+
+echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra' and executed SQL files '$BUILDS_SQL_FILE' and '$FEEDS_SQL_FILE'."
+
 
 ```
 
@@ -96,8 +110,50 @@ COBRA_PASSWORD="your-pass"
 
 ```bash
 
-chmod +x your-script && ./your-script
+chmod +x your-script
 
 ```
 
+### Write the sql files used to create the feed and builds tables
 
+I added a submodule that contains my scripts [gh link](https://github.com/justin-napolitano/mysql-config)
+
+#### Builds
+
+```sql
+CREATE TABLE builds (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    link VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    generator VARCHAR(255),
+    language VARCHAR(10),
+    copyright VARCHAR(255),
+    lastBuildDate TIMESTAMP,
+    atom_link_href VARCHAR(255),
+    atom_link_rel VARCHAR(50),
+    atom_link_type VARCHAR(50)
+);
+```
+
+#### Feed
+
+```sql 
+
+CREATE TABLE feed (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    link VARCHAR(255) NOT NULL,
+    pubDate TIMESTAMP,
+    guid VARCHAR(255),
+    description TEXT
+);
+
+
+```
+
+### Run the script
+
+```./yourscript```
+
+The script should work and create your basic files.. I have some more work to do to create an api to update the tables.  
