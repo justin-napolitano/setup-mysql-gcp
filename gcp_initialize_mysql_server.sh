@@ -9,12 +9,18 @@ set -o allexport
 PROJECT_ID="smart-axis-421517"
 INSTANCE_NAME="jnapolitano-db"
 REGION="us-west2" # e.g., us-central1
+DATABASE_NAME="jnapolitano"
 
 # Authenticate with GCP (make sure you have gcloud SDK installed and authenticated)
 gcloud auth login
 
 # Set the project
 gcloud config set project $PROJECT_ID
+
+
+# Enable the Cloud SQL Admin API
+gcloud services enable sqladmin.googleapis.com
+
 
 # Create a Cloud SQL instance
 gcloud sql instances create $INSTANCE_NAME \
@@ -45,5 +51,13 @@ EOF
 # Optional: Create a database (uncomment if needed)
 # DATABASE_NAME="your-database-name"
 # gcloud sql databases create $DATABASE_NAME --instance=$INSTANCE_NAME
+
+# Create a database
+gcloud sql databases create $DATABASE_NAME --instance=$INSTANCE_NAME
+
+# Execute the SQL file to create the 'posts' table
+gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $SQL_FILE
+
+echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra' and executed SQL file '$SQL_FILE'."
 
 echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra'."
