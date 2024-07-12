@@ -10,6 +10,8 @@ PROJECT_ID="smart-axis-421517"
 INSTANCE_NAME="jnapolitano-db"
 REGION="us-west2" # e.g., us-central1
 DATABASE_NAME="jnapolitano"
+BUILDS_SQL_FILE="/home/cobra/Repos/justin-napolitano/setup-mysql-gcp/mysql-config/builds.sql" # Name of your builds SQL file
+FEED_SQL_FILE="/home/cobra/Repos/justin-napolitano/setup-mysql-gcp/mysql-config/feed.sql"   # Name of your feeds SQL file
 
 # Authenticate with GCP (make sure you have gcloud SDK installed and authenticated)
 gcloud auth login
@@ -55,9 +57,9 @@ EOF
 # Create a database
 gcloud sql databases create $DATABASE_NAME --instance=$INSTANCE_NAME
 
-# Execute the SQL file to create the 'posts' table
-gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $SQL_FILE
+# Execute the SQL files to create the 'builds' and 'feeds' tables
+gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $BUILDS_SQL_FILE
+gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $FEED_SQL_FILE
 
-echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra' and executed SQL file '$SQL_FILE'."
 
-echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra'."
+echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra' and executed SQL files '$BUILDS_SQL_FILE' and '$FEEDS_SQL_FILE'."
