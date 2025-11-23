@@ -1,159 +1,70 @@
-+++
-title =  "Automate Posting Hugo Blog to Social Sites (with a db) Part 3"
-date = "2024-07-12"
-description = "Creating a CMS DB.. Because why not"
-author = "Justin Napolitano"
-tags = ['python', "hugo","programming","fail"]
-images = ["images/feature-image.png"]
-categories = ['Projects']
-+++
+---
+slug: "github-setup-mysql-gcp"
+title: "setup-mysql-gcp"
+repo: "justin-napolitano/setup-mysql-gcp"
+githubUrl: "https://github.com/justin-napolitano/setup-mysql-gcp"
+generatedAt: "2025-11-23T09:35:40.461936Z"
+source: "github-auto"
+---
 
 
-# Automate Blog with GCP MYSQL Server
+# Automate Blog with GCP MySQL Server
 
-So I am just going to create my own CMS.  I know there are other solutions.. but I am nearly there.. I also want to manage content like i manage a linux system.. So I am going to do this with a db.. bashscripts.. and linux servers.  
+## Motivation
 
+Managing content for a CMS requires reliable and scalable data storage. While containerized databases are an option, scaling and managing persistent storage can be challenging. Using Google Cloud Platform's managed MySQL service provides scalability, reliability, and ease of management.
 
+This project automates the setup of a MySQL 8.0 instance on GCP and configures it to serve as the backend for a custom CMS, enabling control over data with standard Linux and shell tooling.
 
-## Create the MYSQL Instance
+## Problem Statement
 
-I could just use a db wihtin a container.. but i want to scale this out..I have a few ideas.. So I will be initializing the server on gcp
+Manual setup of cloud database instances and schema configuration is error-prone and time-consuming. There is a need for a repeatable, automated process to initialize a MySQL server on GCP, configure users, and establish the required database schema.
 
-### Write an initialization script
+## Implementation Details
 
+### Initialization Script
 
-```bash
-#!/bin/bash
+The core automation is a Bash script (`gcp_initialize_mysql_server.sh`) that:
 
-# Source the .env file to load environment variables
-set -o allexport
-source .env
-set -o allexport
+- Sources environment variables from a `.env` file to keep credentials and configuration separate from code.
+- Authenticates the user with GCP using the `gcloud` CLI.
+- Sets the active GCP project.
+- Enables the Cloud SQL Admin API to allow instance management.
+- Creates a Cloud SQL instance with specified CPU, memory, and region parameters.
+- Sets the root password and creates an additional user (`cobra`) with superuser privileges.
 
-# Set other variables
-PROJECT_ID="smart-axis-421517"
-INSTANCE_NAME="jnapolitano-db"
-REGION="us-west2" # e.g., us-central1
-DATABASE_NAME="jnapolitano"
-BUILDS_SQL_FILE="builds.sql" # Name of your builds SQL file
-FEED_SQL_FILE="feed.sql"   # Name of your feeds SQL file
+This script assumes the user has the Google Cloud SDK installed and authenticated.
 
-# Authenticate with GCP (make sure you have gcloud SDK installed and authenticated)
-gcloud auth login
+### Database Schema
 
-# Set the project
-gcloud config set project $PROJECT_ID
+The `mysql-config` directory contains SQL files defining the schema for multiple tables:
 
+- `authors.sql`: Stores author information with UUID primary keys.
+- `posts.sql`: Stores blog posts with references to authors.
+- `mastodon.sql`: Stores Mastodon posts, likely for social media integration.
+- `builds.sql` and `feed.sql`: Define tables for RSS feed data and build metadata.
 
-# Enable the Cloud SQL Admin API
-gcloud services enable sqladmin.googleapis.com
+Each table uses binary UUIDs for unique identifiers, favoring a lightweight and consistent ID generation approach.
 
+### User and Permissions Management
 
-# Create a Cloud SQL instance
-gcloud sql instances create $INSTANCE_NAME \
-    --database-version=MYSQL_8_0 \
-    --cpu=2 \
-    --memory=7680MB \
-    --region=$REGION
+The configuration notes describe creating multiple MySQL users with different privileges:
 
-# Set the root password using environment variable
-gcloud sql users set-password root \
-    --host=% \
-    --instance=$INSTANCE_NAME \
-    --password=$ROOT_PASSWORD
+- `cobra`: A superuser with full privileges.
+- `admin`: A user with limited administrative privileges.
+- `dummy`: A user with no access, used for testing connections.
 
-# Create a user called 'cobra' using environment variable
-gcloud sql users create cobra \
-    --host=% \
-    --instance=$INSTANCE_NAME \
-    --password=$COBRA_PASSWORD
+This separation supports security best practices by limiting access based on roles.
 
-# Grant superuser privileges to 'cobra'
-gcloud sql connect $INSTANCE_NAME --user=root --quiet << EOF
-ALTER USER 'cobra'@'%' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'cobra'@'%' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-EOF
+## Practical Considerations
 
-# Optional: Create a database (uncomment if needed)
-# DATABASE_NAME="your-database-name"
-# gcloud sql databases create $DATABASE_NAME --instance=$INSTANCE_NAME
+- Passwords are managed via environment variables to avoid hardcoding sensitive data.
+- The script requires manual login to GCP (`gcloud auth login`), which could be automated further with service accounts.
+- The schema files are designed for a small to medium scale CMS, with UUIDs used for primary keys despite known performance trade-offs.
+- The project structure separates automation scripts from SQL schema and documentation, improving maintainability.
 
-# Create a database
-gcloud sql databases create $DATABASE_NAME --instance=$INSTANCE_NAME
+## Summary
 
-# Execute the SQL files to create the 'builds' and 'feeds' tables
-gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $BUILDS_SQL_FILE
-gcloud sql connect $INSTANCE_NAME --user=cobra --database=$DATABASE_NAME --quiet < $FEED_SQL_FILE
+This project provides a pragmatic approach to automating the deployment and configuration of a MySQL server on GCP for CMS use. It balances automation with manual control, enabling repeatable deployments while allowing customization of database schema and user permissions. The use of shell scripting and GCP CLI tools aligns with common DevOps practices, making it accessible to engineers familiar with cloud and Linux environments.
 
-
-echo "MySQL instance $INSTANCE_NAME created successfully in project $PROJECT_ID with superuser 'cobra' and executed SQL files '$BUILDS_SQL_FILE' and '$FEEDS_SQL_FILE'."
-
-
-```
-
-### Create a .env file to save your passwords
-
-There are a number of ways to keep passwords out of github. In this case I am just going to add the passes to a .env file and source it 
-
-the file looks like 
-
-```bash
-# .env
-ROOT_PASSWORD="your-pass"
-COBRA_PASSWORD="your-pass"
-```
-
-### Run
-
-### Chmod
-
-```bash
-
-chmod +x your-script
-
-```
-
-### Write the sql files used to create the feed and builds tables
-
-I added a submodule that contains my scripts [gh link](https://github.com/justin-napolitano/mysql-config)
-
-#### Builds
-
-```sql
-CREATE TABLE builds (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    link VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    generator VARCHAR(255),
-    language VARCHAR(10),
-    copyright VARCHAR(255),
-    lastBuildDate TIMESTAMP,
-    atom_link_href VARCHAR(255),
-    atom_link_rel VARCHAR(50),
-    atom_link_type VARCHAR(50)
-);
-```
-
-#### Feed
-
-```sql 
-
-CREATE TABLE feed (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    link VARCHAR(255) NOT NULL,
-    pubDate TIMESTAMP,
-    guid VARCHAR(255),
-    description TEXT
-);
-
-
-```
-
-### Run the script
-
-```./yourscript```
-
-The script should work and create your basic files.. I have some more work to do to create an api to update the tables.  
+Returning to this project, one should focus on extending automation, improving security (e.g., secret management), and integrating schema deployment into the initialization workflow.
