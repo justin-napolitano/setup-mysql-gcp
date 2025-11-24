@@ -21,6 +21,12 @@ seoSecondaryKeywords:
   - cms database
   - gcp bash script
 seoOptimized: true
+topicFamily: automation
+topicFamilyConfidence: 0.95
+topicFamilyNotes: >-
+  The post centers on automating the setup and configuration of a MySQL server on GCP, using shell
+  scripting and cloud CLI tools, which aligns closely with the Automation family focused on
+  deployment and scripting automation.
 ---
 
 # Automate Blog with GCP MySQL Server
@@ -83,3 +89,4 @@ This separation supports security best practices by limiting access based on rol
 This project provides a pragmatic approach to automating the deployment and configuration of a MySQL server on GCP for CMS use. It balances automation with manual control, enabling repeatable deployments while allowing customization of database schema and user permissions. The use of shell scripting and GCP CLI tools aligns with common DevOps practices, making it accessible to engineers familiar with cloud and Linux environments.
 
 Returning to this project, one should focus on extending automation, improving security (e.g., secret management), and integrating schema deployment into the initialization workflow.
+
