@@ -1,13 +1,13 @@
 ---
 slug: github-setup-mysql-gcp
-title: Automating MySQL 8.0 Setup on Google Cloud Platform for CMS
+title: Automate MySQL Server Setup on GCP for CMS
 repo: justin-napolitano/setup-mysql-gcp
 githubUrl: https://github.com/justin-napolitano/setup-mysql-gcp
 generatedAt: '2025-11-23T09:35:40.461936Z'
 source: github-auto
 summary: >-
-  Automation script and schema for deploying a MySQL 8.0 instance on GCP, configuring users and
-  database schema for a custom CMS backend.
+  This guide details automating MySQL server setup on GCP, covering
+  initialization scripts, schema design, and user management for a CMS.
 tags:
   - mysql
   - google-cloud-platform
@@ -15,18 +15,24 @@ tags:
   - automation
   - bash
   - cloud-sql
-seoPrimaryKeyword: mysql setup gcp
+  - gcp
+  - devops
+seoPrimaryKeyword: automate mysql server gcp
 seoSecondaryKeywords:
+  - gcp mysql setup
   - cloud sql automation
-  - cms database
-  - gcp bash script
+  - bash script mysql
+  - database schema design
+  - user management mysql
 seoOptimized: true
 topicFamily: automation
 topicFamilyConfidence: 0.95
 topicFamilyNotes: >-
-  The post centers on automating the setup and configuration of a MySQL server on GCP, using shell
-  scripting and cloud CLI tools, which aligns closely with the Automation family focused on
-  deployment and scripting automation.
+  The post centers on automating the setup and configuration of a MySQL server
+  on GCP, using shell scripting and cloud CLI tools, which aligns closely with
+  the Automation family focused on deployment and scripting automation.
+kind: project
+id: github-setup-mysql-gcp
 ---
 
 # Automate Blog with GCP MySQL Server
