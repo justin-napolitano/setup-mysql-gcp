@@ -7,8 +7,8 @@ githubUrl: https://github.com/justin-napolitano/setup-mysql-gcp
 generatedAt: '2025-11-24T21:36:17.672Z'
 source: github-auto
 summary: >-
-  This project provides scripts to automate MySQL server setup and configuration
-  on GCP, including user management and SQL schema files.
+  This project provides scripts to automate MySQL server setup and configuration on GCP, including
+  user management and SQL schema files.
 tags:
   - gcp
   - mysql
@@ -23,8 +23,8 @@ seoSecondaryKeywords:
   - bash scripts for gcp
   - google cloud mysql configuration
 seoOptimized: true
-topicFamily: null
-topicFamilyConfidence: null
+topicFamily: automation
+topicFamilyConfidence: 0.9
 kind: project
 entryLayout: project
 showInProjects: true
@@ -111,3 +111,4 @@ setup-mysql-gcp/
 ---
 
 *Note: This project assumes familiarity with GCP, MySQL, and shell scripting.*
+
